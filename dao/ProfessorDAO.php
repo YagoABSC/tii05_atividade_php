@@ -3,7 +3,8 @@ require_once 'BaseDAO.php';
 require_once 'entity/Professor.php';
 require_once 'config/Database.php';
 
-class ProfessorDAO{
+class ProfessorDAO implements BaseDAO
+{
     private $db;
 
     public function __construct() {

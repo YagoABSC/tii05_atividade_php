@@ -5,7 +5,7 @@ require_once 'entity/Aluno.php';
 require_once 'entity/Professor.php';
 require_once 'config/Database.php';
 
-class DisciplinaDAO
+class DisciplinaDAO implements BaseDAO
 {
     private $db;
 
@@ -72,7 +72,44 @@ class DisciplinaDAO
         Implemnte o retorno de uma disciplina, contendo seus respectivos alunos
         */
 
-        return null;
+        $sql = "SELECT 
+        d.id AS d_id, 
+        d.nome AS d_nome, 
+        d.carga_horaria AS d_cargaHoraria,
+        a.matricula AS a_matricula, 
+        a.nome AS a_nome
+        FROM disciplina d
+        JOIN disciplina_aluno da ON d.id = da.disciplina_id
+        JOIN aluno a ON da.aluno_id = a.matricula
+        WHERE d.id = :disciplina_id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':disciplina_id', $disciplinaID);
+        $stmt->execute();
+
+        $disciplinaID = null;
+        $aluno = [];
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+            if($disciplinaID === null){
+                $disciplinaID = new Disciplina(
+                    $row['d_id'],
+                    $row['d_nome'],
+                    $row['d_cargaHoraria']
+                );
+            }
+
+            $aluno[] = new Aluno(
+                $row['a_matricula'],
+                $row['a_nome']
+            );
+        }
+
+        if($disciplinaID !== null){
+            $disciplinaID->setAlunos($aluno);
+        }
+
+        return $disciplinaID;
     }
 
     // Método para obter os professores da disciplina

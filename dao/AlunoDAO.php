@@ -4,7 +4,7 @@ require_once 'entity/Aluno.php';
 require_once 'entity/Disciplina.php';
 require_once 'config/Database.php';
 
-class AlunoDAO
+class AlunoDAO implements BaseDAO
 {
     private $db;
 
@@ -66,6 +66,43 @@ class AlunoDAO
         /*
         Retorne a implementação de um objeto do tipo aluno, contendo suas respectivas disciplinas
          */
-        return null;
+
+        $sql="SELECT a.matricula AS a_matricula, 
+        a.nome AS a_nome, 
+        d.id AS d_id, 
+        d.nome AS d_nome, 
+        d.carga_horaria AS d_cargaHoraria
+        FROM aluno a
+        JOIN disciplina_aluno da ON a.matricula = da.aluno_id
+        JOIN disciplina d ON da.disciplina_id = d.id
+        WHERE a.matricula = :aluno_id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':aluno_id', $alunoID);
+        $stmt->execute();
+
+        $alunoID = null;
+        $disciplina = [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            if ($alunoID === null){
+                $alunoID = new Aluno(
+                    $row['a_matricula'],
+                    $row['a_nome']
+                );                
+            }
+
+            $disciplina[] = new Disciplina(
+                $row['d_id'],
+                $row['d_nome'],
+                $row['d_cargaHoraria']
+            );
+        }
+
+        if($alunoID !== null){
+            $alunoID->setDisciplinas($disciplina);
+        }
+
+        return $alunoID;
     }
 }

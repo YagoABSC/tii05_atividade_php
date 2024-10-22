@@ -8,7 +8,7 @@ class Database {
             $host = 'localhost';
             $dbname = 'controle_turmas';
             $username = 'root';
-            $password = '';
+            $password = 'Daikirai610593';
 
             self::$instance = new PDO("mysql:host=$host;dbname=$dbname", $username , $password);
             self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
